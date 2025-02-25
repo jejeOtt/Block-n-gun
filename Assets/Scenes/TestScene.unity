@@ -4915,6 +4915,10 @@ PrefabInstance:
       propertyPath: hudContainer
       value: 
       objectReference: {fileID: 6047561134015451107}
+    - target: {fileID: 3841445618929961419, guid: 7d8f7df246fbea249aa2c1125d3a0d95, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: fe94a19e20da0a240877fd5a1ed1680a, type: 2}
     - target: {fileID: 5180620312556959709, guid: 7d8f7df246fbea249aa2c1125d3a0d95, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 3720540638
