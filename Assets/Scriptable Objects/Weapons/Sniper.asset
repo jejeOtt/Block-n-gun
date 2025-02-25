@@ -16,7 +16,7 @@ MonoBehaviour:
   weaponPrefab: {fileID: 3502835031660990788, guid: c094c793f5114c64885751bebab65f59, type: 3}
   HitVFXPrefab: {fileID: 6702541773755254251, guid: 1b18b3a5db88b7c41ac1b8cf8bb72ed5, type: 3}
   weaponProjectilePrefab: {fileID: 0}
-  shootSound: {fileID: 0}
+  shootSound: {fileID: 8300000, guid: 9f3fc0b2f60c3be47b8d3f055315b59d, type: 3}
   IsAutomatic: 0
   CanZoom: 1
   CanReload: 1
@@ -26,7 +26,7 @@ MonoBehaviour:
   ZoomRotationSpeed: 0.3
   projectileSpeed: 1
   MagazineSize: 8
-  CurrentMagazineSize: 8
+  CurrentMagazineSize: 7
   AmmoAmount: 24
-  CurrentAmmoAmount: 7
+  CurrentAmmoAmount: 24
   ReloadTime: 2

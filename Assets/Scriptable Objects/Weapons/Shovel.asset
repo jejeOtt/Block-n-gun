@@ -26,5 +26,7 @@ MonoBehaviour:
   ZoomRotationSpeed: 0.3
   projectileSpeed: 1
   MagazineSize: 12
+  CurrentMagazineSize: 12
   AmmoAmount: 12
+  CurrentAmmoAmount: 12
   ReloadTime: 2

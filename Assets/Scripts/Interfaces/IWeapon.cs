@@ -1,5 +1,10 @@
-public interface IWeapon
+using BlockAndGun.Player.Weapon;
+
+namespace BlockAndGun.Services
 {
-    void Attack();
-    void Reload();
+    public interface IWeapon
+    {
+        void Attack(WeaponSO weaponSO);
+        void Reload(WeaponSO weaponSO);
+    }
 }

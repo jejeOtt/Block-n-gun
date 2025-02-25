@@ -1,22 +1,18 @@
-﻿using UnityEngine;
+﻿using BlockAndGun.Services;
+using UnityEngine;
 
 namespace BlockAndGun.Player.Weapon
 {
     public abstract class BaseWeapon : MonoBehaviour, IWeapon
     {
 
-        public WeaponSO weaponData;  // Référence aux stats de l'arme
+        public abstract void Attack(WeaponSO weaponSO);
 
-        protected virtual void Start()
+        public virtual void Reload(WeaponSO weaponSO)
         {
-            if (weaponData == null)
-                Debug.LogError($"WeaponData is missing on {gameObject.name}");
-        }
-        public abstract void Attack();
-
-        public virtual void Reload()
-        {
-            Debug.Log($"{weaponData.name} ne peut pas être rechargée.");
+            {
+                Debug.Log($"{weaponSO.name} ne peut pas être rechargée.");
+            }
         }
 
     }

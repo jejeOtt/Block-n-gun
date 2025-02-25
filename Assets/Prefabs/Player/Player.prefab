@@ -256,7 +256,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5750829679551424935}
-  - component: {fileID: 7759774126113733813}
   - component: {fileID: 6041265367427079067}
   - component: {fileID: 1301010762637814661}
   m_Layer: 3
@@ -281,31 +280,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6230217002221578198}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7759774126113733813
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5313961608491628990}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 341390666
-  InScenePlacedSourceGlobalObjectIdHash: 1370010080
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &6041265367427079067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -318,11 +292,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 324330dfd9ac00f418685d9180b393fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   weaponCamera: {fileID: 2066403734999527344}
-  zoomVignette: {fileID: 0}
-  magazineSizeText: {fileID: 0}
-  ammoSizeText: {fileID: 0}
 --- !u!95 &1301010762637814661
 Animator:
   serializedVersion: 7
@@ -411,7 +381,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6b911390c5825014e8377183a7837d3f, type: 2}
+  - {fileID: 2100000, guid: fe94a19e20da0a240877fd5a1ed1680a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -531,8 +501,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponCamera: {fileID: 6692052244618594962}
-  hudContainer: {fileID: 0}
-  healthText: {fileID: 0}
   defaultBasicPlayerClassSO: {fileID: 11400000, guid: f63c28c9f7159a144bfe3f75c2c590b5, type: 2}
 --- !u!114 &7428750500367832347
 MonoBehaviour:
@@ -578,7 +546,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3720540638
+  GlobalObjectIdHash: 1370010080
   InScenePlacedSourceGlobalObjectIdHash: 1370010080
   DeferredDespawnTick: 0
   Ownership: 1

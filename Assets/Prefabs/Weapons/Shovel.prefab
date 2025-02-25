@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6221429137588146858}
   - component: {fileID: 8245063345458290341}
   - component: {fileID: 4520971380113961463}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Shovel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -81,7 +81,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7994406569774938269}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -115,7 +115,7 @@ GameObject:
   - component: {fileID: 6029707703976764125}
   - component: {fileID: 2643884229236290697}
   - component: {fileID: 7740457523722979553}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Layer.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -199,7 +199,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5087969084616327090}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Shovel_model
   m_TagString: Untagged
   m_Icon: {fileID: 0}

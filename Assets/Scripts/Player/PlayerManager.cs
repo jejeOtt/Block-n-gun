@@ -1,5 +1,7 @@
+using BlockAndGun.Interfaces;
 using BlockAndGun.Misc;
 using BlockAndGun.Player.Classes;
+using BlockAndGun.Services;
 using TMPro;
 using UnityEngine;
 
@@ -9,8 +11,8 @@ namespace BlockAndGun.Player
     {
         [SerializeField] Transform weaponCamera;
 
-        [SerializeField] GameObject hudContainer;
-        [SerializeField] TMP_Text healthText;
+        private LocatorService serviceLocator;
+        private IUIManagerService uIManagerService;
 
         public BasicPlayerClassSO defaultBasicPlayerClassSO;
 
@@ -22,14 +24,23 @@ namespace BlockAndGun.Player
         {
             gameManager = FindFirstObjectByType<GameManager>();
 
+            
+        }
+        private void Start()
+        {
+            serviceLocator = LocatorService.Instance;
+            uIManagerService = serviceLocator.GetService<IUIManagerService>();
+
             currentHealth = defaultBasicPlayerClassSO.Health;
-            healthText.text = currentHealth.ToString();
+            uIManagerService.UpdateHealthUI(currentHealth);
+
         }
 
         public void TakeDamage(int hitDamageAmount)
         {
             currentHealth -= hitDamageAmount;
-            healthText.text = currentHealth.ToString();
+            uIManagerService.UpdateHealthUI(currentHealth);
+
             if (currentHealth <= 0)
             {
                 PlayerGameOver();
@@ -40,7 +51,7 @@ namespace BlockAndGun.Player
         {
             weaponCamera.parent = null;
             gameManager.PlayerLoseAudioClip();
-            hudContainer.SetActive(false);
+            uIManagerService.SetHudContainer(false);
 
             //InputPlayerController inputPlayerController = FindFirstObjectByType<InputPlayerController>();
             //inputPlayerController.SetCursorState(false);

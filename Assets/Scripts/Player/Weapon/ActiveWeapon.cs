@@ -5,33 +5,34 @@ using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace BlockAndGun.Player.Weapon
 {
-    public class ActiveWeapon : NetworkBehaviour
+    public class ActiveWeapon : MonoBehaviour
     {
         [SerializeField] Camera weaponCamera;
-        [SerializeField] GameObject zoomVignette;
-        [SerializeField] TMP_Text magazineSizeText;
-        [SerializeField] TMP_Text ammoSizeText;
 
-        private ServiceLocator serviceLocator;
+        private LocatorService serviceLocator;
+
         private IAudioService audioService;
+        private IUIManagerService uiManagerService;
 
         private Animator animator;
+        private Transform playerCameraRoot;
 
         private PlayerManager playerManager;
-        private InputManager inputManager;
+        private PlayerController playerController;
         private CinemachineVirtualCamera playerFollowCamera;
 
-        private RangeWeapon currentWeapon;
+        private BaseWeapon currentWeapon;
+
         private WeaponSO startingWeaponSO;
-        private List<WeaponSO> cachedWeaponsSO;
         private WeaponSO currentWeaponSO;
 
+        private List<WeaponSO> cachedWeaponsSO;
 
         float defaultCameraFOV;
         float defaultRotationSpeed;
@@ -44,17 +45,25 @@ namespace BlockAndGun.Player.Weapon
         {
             playerManager = GetComponentInParent<PlayerManager>();
             animator = GetComponent<Animator>();
-            inputManager = GetComponentInParent<InputManager>();
+            playerController = GetComponentInParent<PlayerController>();
             playerFollowCamera = FindFirstObjectByType<CinemachineVirtualCamera>();
 
+            var cameraData = Camera.main.GetUniversalAdditionalCameraData();
+            cameraData.cameraStack.Add(weaponCamera);
+
+            playerCameraRoot = transform.parent;
+            playerFollowCamera.Follow = playerCameraRoot;
+
             defaultCameraFOV = playerFollowCamera.m_Lens.FieldOfView;
-            defaultRotationSpeed = inputManager.RotationSpeed;
+            defaultRotationSpeed = playerController.RotationSpeed;
         }
 
         private void Start()
         {
-            serviceLocator = ServiceLocator.Instance;
+            serviceLocator = LocatorService.Instance;
+
             audioService = serviceLocator.GetService<IAudioService>();
+            uiManagerService = serviceLocator.GetService<IUIManagerService>();
 
             cachedWeaponsSO = playerManager.defaultBasicPlayerClassSO.weaponsSO;
             startingWeaponSO = cachedWeaponsSO.Where(x => x.weaponType == WeaponTypeSO.Primary).FirstOrDefault();
@@ -68,13 +77,10 @@ namespace BlockAndGun.Player.Weapon
             timeSinceLastShot += Time.deltaTime;
             timeSinceLastReload += Time.deltaTime;
 
-            UpdateMagazineDisplay();
-            UpdateAmmoDisplay();
+            uiManagerService.UpdateMagazineUI(currentWeaponSO.CurrentMagazineSize);
+            uiManagerService.UpdateAmmoUI(currentWeaponSO.CurrentAmmoAmount);
 
         }
-
-        void UpdateMagazineDisplay() => magazineSizeText.text = currentWeaponSO.CurrentMagazineSize.ToString("D2");
-        void UpdateAmmoDisplay() => ammoSizeText.text = currentWeaponSO.CurrentAmmoAmount.ToString("D2");
         public void RefillsAmmo() => currentWeaponSO.CurrentAmmoAmount = currentWeaponSO.AmmoAmount;
 
         public void RefillsAllWeaponsAmmo()
@@ -105,10 +111,9 @@ namespace BlockAndGun.Player.Weapon
                 Destroy(currentWeapon.gameObject);
             }
 
-            currentWeapon = Instantiate(weaponSO.weaponPrefab, transform).GetComponent<RangeWeapon>();
+            currentWeapon = Instantiate(weaponSO.weaponPrefab, transform).GetComponent<BaseWeapon>();
             currentWeaponSO = weaponSO;
         }
-
 
         public void AdjustMagazineAmount(int amount)
         {
@@ -123,7 +128,7 @@ namespace BlockAndGun.Player.Weapon
             if (timeSinceLastShot >= currentWeaponSO.FireRate && timeSinceLastReload >= currentWeaponSO.ReloadTime
                 && currentWeaponSO.CurrentMagazineSize > 0)
             {
-                currentWeapon.Shoot(currentWeaponSO);
+                currentWeapon.Attack(currentWeaponSO);
                 audioService?.PlaySound(currentWeaponSO.shootSound);
                 animator?.Play(shootString, 0, 0f);
 

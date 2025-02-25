@@ -40,8 +40,6 @@ namespace BlockAndGun.Player.Weapon
         public int CurrentAmmoAmount = 0;
 
         public float ReloadTime = 2.0f;
-
-
     }
     public enum WeaponTypeSO
     {
