@@ -1,4 +1,0 @@
-repository "Block and gun@joottjeremy3@cloud"
-  path "/"
-    br "/main"
-    co "/main"
