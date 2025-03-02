@@ -1,9 +1,12 @@
 using BlockAndGun.Player.Weapon;
+using Cinemachine;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace BlockAndGun.Player.Input
 {
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : NetworkBehaviour
     {
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
@@ -44,6 +47,11 @@ namespace BlockAndGun.Player.Input
         [Header("Cinemachine")]
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
         public GameObject CinemachineCameraTarget;
+
+        public Camera weaponCamera;
+
+        public CinemachineVirtualCamera playerFollowCamera;
+
         [Tooltip("How far in degrees can you move the camera up")]
         public float TopClamp = 90.0f;
         [Tooltip("How far in degrees can you move the camera down")]
@@ -58,6 +66,7 @@ namespace BlockAndGun.Player.Input
         private ActiveWeapon activeWeapon;
         private CharacterController characterController;
         private Vector3 playerVelocity;
+        private Animator animator;
 
         private float speed;
         private float standingHeight;
@@ -68,10 +77,13 @@ namespace BlockAndGun.Player.Input
         private bool isCrouching;
         private bool lerpCrouch;
 
+        private static readonly int Speed = Animator.StringToHash("speed");
+
         void Awake()
         {
             characterController = GetComponent<CharacterController>();
             activeWeapon = GetComponentInChildren<ActiveWeapon>();
+            playerFollowCamera = FindFirstObjectByType<CinemachineVirtualCamera>();
 
             playerInput = new PlayerInput();
 
@@ -86,14 +98,41 @@ namespace BlockAndGun.Player.Input
 
         private void Start()
         {
+            animator = GetComponent<Animator>();
+
             standingHeight = characterController.height;
             speed = MoveSpeed;
+
+            AssignCameraForPlayers();
 
             SetCursorState(true);
         }
 
+        private void AssignCameraForPlayers()
+        {
+            if (IsOwner) // Assigner la caméra seulement au joueur local
+            {
+                if (playerFollowCamera == null || CinemachineCameraTarget == null)
+                {
+                    Debug.LogError("Caméra non assigné");
+                    return;
+                }
+
+                playerFollowCamera.m_Follow = CinemachineCameraTarget.transform;
+                playerFollowCamera.m_LookAt = CinemachineCameraTarget.transform;
+
+                var cameraOverlay = Camera.main.GetUniversalAdditionalCameraData();
+                cameraOverlay.cameraStack.Add(weaponCamera);
+            }
+        }
+
         void Update()
         {
+            if (!IsOwner || !Application.isFocused) return;
+
+            var speedAnimation = (characterController.velocity.magnitude / Time.deltaTime) / MoveSpeed;
+            animator.SetFloat(Speed, speedAnimation);
+
             GroundedCheck();
             ProcessCrouch();
 

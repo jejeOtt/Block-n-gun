@@ -11,21 +11,19 @@ using UnityEngine.Rendering.Universal;
 
 namespace BlockAndGun.Player.Weapon
 {
-    public class ActiveWeapon : MonoBehaviour
+    public class ActiveWeapon : NetworkBehaviour
     {
-        [SerializeField] Camera weaponCamera;
-
         private LocatorService serviceLocator;
 
         private IAudioService audioService;
         private IUIManagerService uiManagerService;
 
         private Animator animator;
-        private Transform playerCameraRoot;
 
         private PlayerManager playerManager;
         private PlayerController playerController;
-        private CinemachineVirtualCamera playerFollowCamera;
+
+        private Camera weaponCamera;
 
         private BaseWeapon currentWeapon;
 
@@ -34,53 +32,61 @@ namespace BlockAndGun.Player.Weapon
 
         private List<WeaponSO> cachedWeaponsSO;
 
+        private NetworkVariable<int> networkCurrentMagazineSize = new NetworkVariable<int>();
+        private NetworkVariable<int> networkCurrentAmmoAmount = new NetworkVariable<int>();
+        private NetworkVariable<int> networkCurrentWeaponIndex = new NetworkVariable<int>(-1); // -1 signifie aucune arme
+
+
         float defaultCameraFOV;
         float defaultRotationSpeed;
         float timeSinceLastShot = 0f;
         float timeSinceLastReload = 0f;
 
         const string shootString = "Shoot";
+        const string reloadString = "Reload";
 
         private void Awake()
         {
             playerManager = GetComponentInParent<PlayerManager>();
-            animator = GetComponent<Animator>();
             playerController = GetComponentInParent<PlayerController>();
-            playerFollowCamera = FindFirstObjectByType<CinemachineVirtualCamera>();
-
-            var cameraData = Camera.main.GetUniversalAdditionalCameraData();
-            cameraData.cameraStack.Add(weaponCamera);
-
-            playerCameraRoot = transform.parent;
-            playerFollowCamera.Follow = playerCameraRoot;
-
-            defaultCameraFOV = playerFollowCamera.m_Lens.FieldOfView;
-            defaultRotationSpeed = playerController.RotationSpeed;
+            animator = GetComponent<Animator>();
         }
 
-        private void Start()
+        public override void OnNetworkSpawn()
         {
-            serviceLocator = LocatorService.Instance;
+            if (IsOwner)
+            {
+                serviceLocator = LocatorService.Instance;
+                audioService = serviceLocator.GetService<IAudioService>();
+                uiManagerService = serviceLocator.GetService<IUIManagerService>();
 
-            audioService = serviceLocator.GetService<IAudioService>();
-            uiManagerService = serviceLocator.GetService<IUIManagerService>();
+                defaultCameraFOV = playerController.playerFollowCamera.m_Lens.FieldOfView;
+                defaultRotationSpeed = playerController.RotationSpeed;
 
-            cachedWeaponsSO = playerManager.defaultBasicPlayerClassSO.weaponsSO;
-            startingWeaponSO = cachedWeaponsSO.Where(x => x.weaponType == WeaponTypeSO.Primary).FirstOrDefault();
+                cachedWeaponsSO = playerManager.defaultBasicPlayerClassSO.weaponsSO;
+                startingWeaponSO = cachedWeaponsSO.Where(x => x.weaponType == WeaponTypeSO.Primary).FirstOrDefault();
 
-            RefillsAllWeaponsAmmo();
-            CreateNewWeapon(startingWeaponSO);
+                RefillsAllWeaponsAmmo();
+
+                CreateNewWeapon(startingWeaponSO);
+
+            }
         }
 
         private void Update()
         {
+            if (!IsOwner) return;
+
             timeSinceLastShot += Time.deltaTime;
             timeSinceLastReload += Time.deltaTime;
 
-            uiManagerService.UpdateMagazineUI(currentWeaponSO.CurrentMagazineSize);
-            uiManagerService.UpdateAmmoUI(currentWeaponSO.CurrentAmmoAmount);
-
+            if (uiManagerService != null && currentWeaponSO != null)
+            {
+                uiManagerService.UpdateMagazineUI(currentWeaponSO.CurrentMagazineSize);
+                uiManagerService.UpdateAmmoUI(currentWeaponSO.CurrentAmmoAmount);
+            }
         }
+
         public void RefillsAmmo() => currentWeaponSO.CurrentAmmoAmount = currentWeaponSO.AmmoAmount;
 
         public void RefillsAllWeaponsAmmo()
@@ -94,6 +100,8 @@ namespace BlockAndGun.Player.Weapon
 
         public void SwitchWeapon(Vector2 input)
         {
+            if (!IsOwner) return;
+
             int currentIndex = cachedWeaponsSO.IndexOf(currentWeaponSO);
 
             // on utilise le modulo afin de pouvoir boucler dans la loop d'armes qu'on a au lieu d'utiliser des if (merci chatGPT)
@@ -113,7 +121,9 @@ namespace BlockAndGun.Player.Weapon
 
             currentWeapon = Instantiate(weaponSO.weaponPrefab, transform).GetComponent<BaseWeapon>();
             currentWeaponSO = weaponSO;
+
         }
+
 
         public void AdjustMagazineAmount(int amount)
         {
@@ -123,28 +133,52 @@ namespace BlockAndGun.Player.Weapon
 
         public void HandleShoot()
         {
+            if(!IsOwner) return;
+
             if (currentWeapon == null || currentWeaponSO == null) return; // Vérifie si l'arme existe
 
             if (timeSinceLastShot >= currentWeaponSO.FireRate && timeSinceLastReload >= currentWeaponSO.ReloadTime
                 && currentWeaponSO.CurrentMagazineSize > 0)
             {
-                currentWeapon.Attack(currentWeaponSO);
-                audioService?.PlaySound(currentWeaponSO.shootSound);
-                animator?.Play(shootString, 0, 0f);
+                PlayerShoot();
 
                 timeSinceLastShot = 0f;
 
                 AdjustMagazineAmount(-1);
+
+                ShootClientRpc();
             }
+        }
+
+        [Rpc(SendTo.ClientsAndHost)]
+        private void ShootClientRpc()
+        {
+            // Ne rien faire si c'est le propriétaire (il a déjà joué les effets)
+            if (IsOwner) return;
+            Debug.Log("Client : " + OwnerClientId + " a tiré !");
+
+            if (currentWeapon != null && currentWeaponSO != null)
+            {
+                PlayerShoot();
+
+            }
+        }
+
+        private void PlayerShoot()
+        {
+            currentWeapon.Attack(currentWeaponSO);
+            audioService?.PlaySound(currentWeaponSO.shootSound);
+            animator?.Play(shootString, 0, 0f);
         }
 
         public void HandleReload()
         {
+            if (!IsOwner) return;
+
             // Vérifier si le reload est possible
             if (timeSinceLastReload < currentWeaponSO.ReloadTime || currentWeaponSO.CurrentAmmoAmount <= 0
                 || currentWeaponSO.CurrentMagazineSize == currentWeaponSO.MagazineSize) return;
             // Rien à faire si le reload est en cooldown ou si le chargeur est déjà plein
-            timeSinceLastReload = 0f;
 
             StartCoroutine(ReloadTimeCoolDown());
 
@@ -152,7 +186,8 @@ namespace BlockAndGun.Player.Weapon
 
         private IEnumerator ReloadTimeCoolDown()
         {
-            animator.Play("Reload", 0, 0f);
+            animator?.Play(reloadString, 0, 0f);
+            timeSinceLastReload = 0f;
 
             yield return new WaitForSeconds(currentWeaponSO.ReloadTime);
 
