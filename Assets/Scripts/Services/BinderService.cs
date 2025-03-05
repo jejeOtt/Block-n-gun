@@ -13,14 +13,14 @@ namespace BlockAndGun.Services
         {
             LocatorService serviceLocator = LocatorService.Instance;
 
-            foreach(MonoBehaviour service in servicesToBind)
+            foreach (MonoBehaviour service in servicesToBind)
             {
                 Type serviceType = service.GetType();
 
                 Type serviceInterface = serviceType.GetInterfaces().FirstOrDefault();
 
                 //Si il y a une interface on l'enregistre
-                if(serviceInterface != null)
+                if (serviceInterface != null)
                 {
                     serviceLocator.Register(serviceInterface, service);
                 }

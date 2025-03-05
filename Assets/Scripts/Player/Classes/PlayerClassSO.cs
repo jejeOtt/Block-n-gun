@@ -1,11 +1,11 @@
+using BlockAndGun.Player.Weapon;
 using System.Collections.Generic;
 using UnityEngine;
-using BlockAndGun.Player.Weapon;
 
 namespace BlockAndGun.Player.Classes
 {
     [CreateAssetMenu(fileName = "BasicPlayerClassSO", menuName = "Scriptable Objects/BasicPlayerClassSO")]
-    public class BasicPlayerClassSO : ScriptableObject
+    public class PlayerClassSO : ScriptableObject
     {
         [Range(1, 300)]
         public int Health = 100;

@@ -6,11 +6,11 @@ namespace BlockAndGun.Services
 {
     public class UIManagerService : MonoBehaviour, IUIManagerService
     {
-        public GameObject hudContainer;
-        public TMP_Text healthText;
-        public TMP_Text magazineText;
-        public TMP_Text ammoSizeText;
-        public GameObject zoomVignette;
+        [SerializeField] private GameObject hudContainer;
+        [SerializeField] private TMP_Text healthText;
+        [SerializeField] private TMP_Text magazineText;
+        [SerializeField] private TMP_Text ammoSizeText;
+        [SerializeField] private GameObject zoomVignette;
 
         public void UpdateAmmoUI(int ammoAmount)
         {

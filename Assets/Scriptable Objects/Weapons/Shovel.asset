@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a943b9e6cbb7a814d95a0d1eceed5432, type: 3}
   m_Name: Shovel
   m_EditorClassIdentifier: 
+  weaponID: 102
   weaponType: 3
   weaponPrefab: {fileID: 1166740506328259721, guid: 61a716d0579e3ab45a586e3e43b0c958, type: 3}
   HitVFXPrefab: {fileID: 6702541773755254251, guid: 1b18b3a5db88b7c41ac1b8cf8bb72ed5, type: 3}
@@ -26,7 +27,7 @@ MonoBehaviour:
   ZoomRotationSpeed: 0.3
   projectileSpeed: 1
   MagazineSize: 12
-  CurrentMagazineSize: 12
   AmmoAmount: 12
+  CurrentMagazineSize: 12
   CurrentAmmoAmount: 12
   ReloadTime: 2

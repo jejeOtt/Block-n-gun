@@ -1,6 +1,6 @@
 using BlockAndGun.Player.Weapon;
 
-namespace BlockAndGun.Pickups 
+namespace BlockAndGun.Pickups
 {
     public class AmmoPickup : Pickup
     {

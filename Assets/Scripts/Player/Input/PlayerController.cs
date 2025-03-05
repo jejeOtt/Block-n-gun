@@ -130,8 +130,8 @@ namespace BlockAndGun.Player.Input
         {
             if (!IsOwner || !Application.isFocused) return;
 
-            var speedAnimation = (characterController.velocity.magnitude / Time.deltaTime) / MoveSpeed;
-            animator.SetFloat(Speed, speedAnimation);
+            var speedAnimation = characterController.velocity.magnitude / MoveSpeed; // MoveSpeed pour normaliser
+            animator.SetFloat(Speed, speedAnimation, 0.1f, Time.deltaTime);
 
             GroundedCheck();
             ProcessCrouch();

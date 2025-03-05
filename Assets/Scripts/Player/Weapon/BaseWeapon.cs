@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace BlockAndGun.Player.Weapon
 {
-    public abstract class BaseWeapon : MonoBehaviour, IWeapon
+    public abstract class BaseWeapon : MonoBehaviour, IWeaponBase
     {
 
         public abstract void Attack(WeaponSO weaponSO);

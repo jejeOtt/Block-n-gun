@@ -10,19 +10,26 @@ public class NetworkManagerUI : MonoBehaviour
 
     private void Awake()
     {
-        serverBtn.onClick.AddListener(() =>
-        {
-            NetworkManager.Singleton.StartServer();
-        });
+        //serverBtn.onClick.AddListener(() =>
+        //{
+        //    NetworkManager.Singleton.StartServer();
+        //});
 
         hostBtn.onClick.AddListener(() =>
         {
             NetworkManager.Singleton.StartHost();
-        });        
-        
+            HideNetworkUI();
+        });
+
         clientBtn.onClick.AddListener(() =>
         {
             NetworkManager.Singleton.StartClient();
+            HideNetworkUI();
         });
+    }
+
+    private void HideNetworkUI()
+    {
+        this.gameObject.SetActive(false);
     }
 }

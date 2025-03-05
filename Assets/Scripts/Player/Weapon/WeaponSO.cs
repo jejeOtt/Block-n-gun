@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace BlockAndGun.Player.Weapon
@@ -5,7 +6,10 @@ namespace BlockAndGun.Player.Weapon
     [CreateAssetMenu(fileName = "WeaponSO", menuName = "Scriptable Objects/WeaponSO")]
     public class WeaponSO : ScriptableObject
     {
+        public int weaponID;
+
         public WeaponTypeSO weaponType;
+
         public GameObject weaponPrefab;
         public GameObject HitVFXPrefab;
         public GameObject weaponProjectilePrefab;

@@ -2,7 +2,6 @@ using BlockAndGun.Interfaces;
 using BlockAndGun.Misc;
 using BlockAndGun.Player.Classes;
 using BlockAndGun.Services;
-using TMPro;
 using UnityEngine;
 
 namespace BlockAndGun.Player
@@ -14,7 +13,7 @@ namespace BlockAndGun.Player
         private LocatorService serviceLocator;
         private IUIManagerService uIManagerService;
 
-        public BasicPlayerClassSO defaultBasicPlayerClassSO;
+        public PlayerClassSO defaultBasicPlayerClassSO;
 
         GameManager gameManager;
 
@@ -24,7 +23,7 @@ namespace BlockAndGun.Player
         {
             gameManager = FindFirstObjectByType<GameManager>();
 
-            
+
         }
         private void Start()
         {

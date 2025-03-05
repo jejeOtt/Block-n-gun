@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a943b9e6cbb7a814d95a0d1eceed5432, type: 3}
   m_Name: Machine Gun
   m_EditorClassIdentifier: 
+  weaponID: 103
   weaponType: 1
   weaponPrefab: {fileID: 7469953457364373451, guid: 0dc10c936c0f16946976921879d943ef, type: 3}
   HitVFXPrefab: {fileID: 6702541773755254251, guid: 1b18b3a5db88b7c41ac1b8cf8bb72ed5, type: 3}
@@ -26,8 +27,7 @@ MonoBehaviour:
   ZoomRotationSpeed: 0.3
   projectileSpeed: 1
   MagazineSize: 48
-  CurrentMagazineSize: 0
   AmmoAmount: 0
+  CurrentMagazineSize: 0
   CurrentAmmoAmount: 0
   ReloadTime: 2
-  ReloadCoolownTime: 2
