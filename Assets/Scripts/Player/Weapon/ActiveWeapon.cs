@@ -4,6 +4,7 @@ using BlockAndGun.Services;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Entities;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -41,55 +42,6 @@ namespace BlockAndGun.Player.Weapon
         const string shootString = "Shoot";
         const string reloadString = "Reload";
 
-        private void Awake()
-        {
-            playerManager = GetComponentInParent<PlayerManager>();
-            playerController = GetComponentInParent<PlayerController>();
-            animator = GetComponent<Animator>();
-        }
-
-        public override void OnNetworkSpawn()
-        {
-
-            if (IsOwner || IsServer)
-            {
-                Debug.Log("Client : " + OwnerClientId +
-                    ", IsServer : " + IsServer + 
-                    ", IsHost : " + IsHost + 
-                    ", IsClient : " + IsClient);
-
-                serviceLocator = LocatorService.Instance;
-                audioService = serviceLocator.GetService<IAudioService>();
-                uiManagerService = serviceLocator.GetService<IUIManagerService>();
-                weaponManagerService = serviceLocator.GetService<IWeaponManagerService>();
-
-                defaultCameraFOV = playerController.playerFollowCamera.m_Lens.FieldOfView;
-                defaultRotationSpeed = playerController.RotationSpeed;
-
-                playerWeaponsSO = playerManager.defaultBasicPlayerClassSO.weaponsSO;
-
-                int startingWeaponSOID = playerWeaponsSO.FirstOrDefault(x => x.weaponType == WeaponTypeSO.Primary).weaponID;
-
-                RefillsAllWeaponsAmmo();
-                InstantiateWeaponServerRpc(startingWeaponSOID);
-
-            }
-        }
-
-        private void Update()
-        {
-            if (!IsOwner) return;
-
-            timeSinceLastShot += Time.deltaTime;
-            timeSinceLastReload += Time.deltaTime;
-            
-            if (uiManagerService != null && currentWeaponSO != null)
-            {
-                uiManagerService.UpdateMagazineUI(currentWeaponSO.CurrentMagazineSize);
-                uiManagerService.UpdateAmmoUI(currentWeaponSO.CurrentAmmoAmount);
-            }
-        }
-
         public void RefillsAmmo() => currentWeaponSO.CurrentAmmoAmount = currentWeaponSO.AmmoAmount;
 
         public void RefillsAllWeaponsAmmo()
@@ -101,6 +53,57 @@ namespace BlockAndGun.Player.Weapon
             });
         }
 
+        private void Awake()
+        {
+            playerManager = GetComponentInParent<PlayerManager>();
+            playerController = GetComponentInParent<PlayerController>();
+            animator = GetComponent<Animator>();
+
+            serviceLocator = LocatorService.Instance;
+
+            audioService = serviceLocator.GetService<IAudioService>();
+            uiManagerService = serviceLocator.GetService<IUIManagerService>();
+            weaponManagerService = serviceLocator.GetService<IWeaponManagerService>();
+        }
+
+        public override void OnNetworkSpawn()
+        {
+
+            if (IsOwner)
+            {
+                Debug.Log("Client : " + OwnerClientId +
+                    ", IsServer : " + IsServer +
+                    ", IsHost : " + IsHost +
+                    ", IsClient : " + IsClient);
+
+
+                defaultCameraFOV = playerController.playerFollowCamera.m_Lens.FieldOfView;
+                defaultRotationSpeed = playerController.RotationSpeed;
+
+                playerWeaponsSO = playerManager.defaultBasicPlayerClassSO.weaponsSO;
+
+                WeaponSO startingWeaponSO = playerWeaponsSO.FirstOrDefault(x => x.weaponType == WeaponTypeSO.Primary);
+
+                RefillsAllWeaponsAmmo();
+                InstantiateNewWeaponForPlayer(startingWeaponSO);
+
+            }
+        }
+
+        private void Update()
+        {
+            if (!IsOwner) return;
+
+            timeSinceLastShot += Time.deltaTime;
+            timeSinceLastReload += Time.deltaTime;
+
+            if (uiManagerService != null && currentWeaponSO != null)
+            {
+                uiManagerService.UpdateMagazineUI(currentWeaponSO.CurrentMagazineSize);
+                uiManagerService.UpdateAmmoUI(currentWeaponSO.CurrentAmmoAmount);
+            }
+        }
+
         public void SwitchWeapon(Vector2 input)
         {
             if (!IsOwner) return;
@@ -110,17 +113,10 @@ namespace BlockAndGun.Player.Weapon
             // on utilise le modulo afin de pouvoir boucler dans la loop d'armes qu'on a au lieu d'utiliser des if (merci chatGPT)
             int nextIndex = (currentIndex - (int)input.y + playerWeaponsSO.Count) % playerWeaponsSO.Count;
 
-            int weaponID = playerWeaponsSO[nextIndex].weaponID;
+            var weapon = playerWeaponsSO[nextIndex];
 
             // Envoyer la requête au serveur pour changer l'arme
-            InstantiateWeaponServerRpc(weaponID);
-        }
-
-        [Rpc(SendTo.Server)]
-        private void InstantiateWeaponServerRpc(int weaponID)
-        {
-            WeaponSO weaponSOToInstantiate = weaponManagerService.GetWeaponPrefabID(weaponID);
-            InstantiateNewWeaponForPlayer(weaponSOToInstantiate);
+            InstantiateNewWeaponForPlayer(weapon);
         }
 
         private void InstantiateNewWeaponForPlayer(WeaponSO weaponSO)
@@ -129,13 +125,10 @@ namespace BlockAndGun.Player.Weapon
 
             if (currentWeapon)
             {
-                currentWeapon.GetComponent<NetworkObject>().Despawn();
+                Destroy(currentWeapon.gameObject);
             }
 
             currentWeapon = Instantiate(weaponSO.weaponPrefab, transform).GetComponent<BaseWeapon>();
-            var networkObject = currentWeapon.GetComponent<NetworkObject>();
-            
-            networkObject.SpawnWithOwnership(OwnerClientId);
             currentWeaponSO = weaponSO;
 
         }
@@ -195,41 +188,5 @@ namespace BlockAndGun.Player.Weapon
 
         }
 
-        //private void HandleZoom()
-        //{
-        //    if (!currentWeaponSO.CanZoom)
-        //    {
-        //        inputPlayerController.ZoomInput(false);
-        //        ZoomOut();
-        //        return;
-        //    }
-
-        //    if (inputPlayerController.zoom)
-        //    {
-        //        ZoomIn();
-        //    }
-        //    else
-        //    {
-        //        ZoomOut();
-        //    }
-        //}
-
-        //private void ZoomOut()
-        //{
-        //    playerFollowCamera.m_Lens.FieldOfView = defaultCameraFOV;
-        //    weaponCamera.fieldOfView = defaultCameraFOV;
-
-        //    zoomVignette.SetActive(false);
-        //    firstPersonController.ChangeRotationSpeed(defaultRotationSpeed);
-        //}
-
-        //private void ZoomIn()
-        //{
-        //    playerFollowCamera.m_Lens.FieldOfView = currentWeaponSO.ZoomAmount;
-        //    weaponCamera.fieldOfView = currentWeaponSO.ZoomAmount;
-
-        //    zoomVignette.SetActive(true);
-        //    firstPersonController.ChangeRotationSpeed(currentWeaponSO.ZoomRotationSpeed);
-        //}
     }
 }
